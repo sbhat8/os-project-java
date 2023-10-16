@@ -9,30 +9,58 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.*;
 
-public class Main {
-    public static void main(String[] args) throws IOException {
+public class Main extends Thread {
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter query: ");
-        String query = scanner.nextLine();
-        if (query.isEmpty()) {
+        System.out.print("Enter query in comma separated list: ");
+        String queryArray = scanner.nextLine();
+        if (queryArray.isEmpty()) {
             System.out.println("Query cannot be empty.");
             return;
         }
 
-        String resultUrl = getResultURL(query);
+        String[] queries = queryArray.split(",");
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (String query : queries) {
+            Future<?> future = executorService.submit(() -> {
+                try {
+                    String threadName = Thread.currentThread().getName();
+                    parseResults(query.strip(), threadName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            futures.add(future);
+        }
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        executorService.shutdown();
+    }
+
+    public static void parseResults(String query, String threadName) throws IOException {
+        String resultUrl = getResultURL(query, threadName);
         if (resultUrl == null) {
-            System.out.println("No results found.");
+            System.out.println(threadName + ": No results found.");
             return;
         }
-        System.out.println("Result url: " + resultUrl);
+        System.out.println(threadName + ": Result url: " + resultUrl);
 
-        HashMap<String, List<String>> metrics = getMetrics(resultUrl);
-        System.out.println("\n\nWeather details for " + query);
+        HashMap<String, List<String>> metrics = getMetrics(resultUrl, threadName);
+        System.out.println("\n\n" + threadName + ": Weather details for " + query);
         for (Map.Entry<String, List<String>> metric : metrics.entrySet()) {
             System.out.print(metric.getKey() + ": ");
             List<String> details = metric.getValue();
@@ -40,7 +68,7 @@ public class Main {
             if (details.size() > 2) {
                 System.out.print(" " + details.get(2));
             }
-            System.out.println("\n");
+            System.out.print("\n");
         }
     }
 
@@ -51,8 +79,8 @@ public class Main {
                 .get();
     }
 
-    public static Document getDocumentWithJS(String url) {
-        System.out.println("\nLoading result details...");
+    public static Document getDocumentWithJS(String url, String threadName) {
+        System.out.println("\n" + threadName + ": Loading result details...");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         WebDriver driver = new ChromeDriver(options);
@@ -62,9 +90,9 @@ public class Main {
         return doc;
     }
 
-    public static String getResultURL(String query) throws IOException {
+    public static String getResultURL(String query, String threadName) throws IOException {
         String queryUrl = "https://www.theweathernetwork.com/us/search?q=" + query.replace(" ", "+") + "&lat=&lon=";
-        System.out.println("\nQuery url: " + queryUrl + "\nLoading query results...");
+        System.out.println("\n" + threadName+ ": Query url: " + queryUrl + "\nLoading query results...");
         Document doc = getDocument(queryUrl);
         Elements results = doc.select("li.result ");
 
@@ -83,12 +111,11 @@ public class Main {
                 }
             }
         }
-
         return resultUrl;
     }
 
-    public static HashMap<String, List<String>> getMetrics(String resultUrl) {
-        Document doc = getDocumentWithJS(resultUrl);
+    public static HashMap<String, List<String>> getMetrics(String resultUrl, String threadName) {
+        Document doc = getDocumentWithJS(resultUrl, threadName);
         HashMap<String, List<String>> metricsText = new HashMap<>();
         Element temp = doc.select("span.temp").first();
         String temperature = "";
@@ -124,7 +151,6 @@ public class Main {
 
             metricsText.put(labelText, List.of(valueText, unitText, vectorText));
         }
-
         return metricsText;
     }
 }
