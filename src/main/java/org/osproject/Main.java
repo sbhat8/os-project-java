@@ -19,9 +19,19 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter query: ");
         String query = scanner.nextLine();
-        String resultUrl = getResultURL(query);
-        HashMap<String, List<String>> metrics = getMetrics(resultUrl);
+        if (query.isEmpty()) {
+            System.out.println("Query cannot be empty.");
+            return;
+        }
 
+        String resultUrl = getResultURL(query);
+        if (resultUrl == null) {
+            System.out.println("No results found.");
+            return;
+        }
+        System.out.println("Result url: " + resultUrl);
+
+        HashMap<String, List<String>> metrics = getMetrics(resultUrl);
         System.out.println("\n\nWeather details for " + query);
         for (Map.Entry<String, List<String>> metric : metrics.entrySet()) {
             System.out.print(metric.getKey() + ": ");
@@ -74,11 +84,6 @@ public class Main {
             }
         }
 
-        if (resultUrl == null) {
-            System.out.println("No results found.");
-            return null;
-        }
-        System.out.println("Result url: " + resultUrl);
         return resultUrl;
     }
 
