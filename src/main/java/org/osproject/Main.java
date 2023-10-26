@@ -15,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.swing.*;
+
 public class Main extends Thread {
     public static void main(String[] args) {
         // user input, receives string of comma separated locations, which is split into an array
@@ -191,4 +193,21 @@ public class Main extends Thread {
         }
         return metricsText;
     }
+    //table creation
+
+    public static void FinalTable(String [] queries, HashMap<String, List<String>> metricsText){
+
+        numQueries =  queries.length() + 1;
+        JTable weatherTable = new JTable(9, numQueries);
+        frame  = new JFrame();
+        frame.setTitle("Weather Details for Queries");
+
+        
+
+        
+        
+        
+    }
+
+    
 }
