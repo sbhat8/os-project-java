@@ -19,6 +19,7 @@ public class Main extends Thread {
     public static void main(String[] args) {
         // user input, receives string of comma separated locations, which is split into an array
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Source of information: The Weather Network, URL: www.theweathernetwork.com")
         System.out.print("Enter query in comma separated list: ");
         String queryArray = scanner.nextLine();
         if (queryArray.isEmpty()) {
@@ -105,8 +106,6 @@ public class Main extends Thread {
     // function to obtain the result URL from the search page
     // e.g. query="atlanta", queryUrl="https://www.theweathernetwork.com/us/search?q=atlanta&lat=&lon="
     public static String getResultURL(String query, String threadName) throws IOException {
-
-        System.out.println("Source of information: The Weather Network, URL: www.theweathernetwork.com")
         
         // builds query url with domain, search parameter (replaces spacing with '+')
         String queryUrl = "https://www.theweathernetwork.com/us/search?q=" + query.replace(" ", "+") + "&lat=&lon=";
