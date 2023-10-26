@@ -193,19 +193,21 @@ public class Main extends Thread {
         }
         return metricsText;
     }
-    //table creation
-
+    // Making a final table to display the weather information for all threads
     public static void FinalTable(String [] queries, HashMap<String, List<String>> metricsText){
 
-        numQueries =  queries.length() + 1;
-        JTable weatherTable = new JTable(9, numQueries);
+        numQueries =  queries.length();
         frame  = new JFrame();
         frame.setTitle("Weather Details for Queries");
+        ArrayList<String> columns = new ArrayList<String>();
 
+        for (String metric : metricsText.keySet()){    
+            columns.add(metric);
+        }
+            
+        JTable weatherTable = new JTable(numQueries, columns);
         
 
-        
-        
         
     }
 
