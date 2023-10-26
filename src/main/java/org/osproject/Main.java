@@ -105,9 +105,12 @@ public class Main extends Thread {
     // function to obtain the result URL from the search page
     // e.g. query="atlanta", queryUrl="https://www.theweathernetwork.com/us/search?q=atlanta&lat=&lon="
     public static String getResultURL(String query, String threadName) throws IOException {
+
+        System.out.println("Source of information: The Weather Network, URL: www.theweathernetwork.com")
+        
         // builds query url with domain, search parameter (replaces spacing with '+')
         String queryUrl = "https://www.theweathernetwork.com/us/search?q=" + query.replace(" ", "+") + "&lat=&lon=";
-        System.out.println("\n" + threadName + ": Query url: " + queryUrl + "\nLoading query results...");
+        System.out.println("\n" + threadName + ": Search Page URL for " + query + ": " + queryUrl + "\nLoading query results...");
 
         // obtains document using Jsoup and searches for result elements ("li.result")
         // "li" represents the HTML list element on the page, and "result" is the CSS class that represents the result elements
