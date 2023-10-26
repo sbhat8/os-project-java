@@ -214,9 +214,11 @@ public class Main extends Thread {
             columns.add(currValue)
         }
             
-        
+        for (String city:  queries){
+            rows.add(city)
+                }
 
-            JTable weatherTable = new JTable(numQueries, columns);
+        JTable weatherTable = new JTable(rows, columns);
 
         
         
