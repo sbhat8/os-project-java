@@ -200,14 +200,26 @@ public class Main extends Thread {
         frame  = new JFrame();
         frame.setTitle("Weather Details for Queries");
         ArrayList<String> columns = new ArrayList<String>();
+        ArrayList<String> rows = new ArrayList<String>();
 
         for (String metric : metricsText.keySet()){    
             columns.add(metric);
         }
+
+        for (metrixText.values().forEach(value -> {
+            currValue = value[0] + value[1]
+            if value.length() > 1 {
+                currValue += value[2]
+                    }
+            columns.add(currValue)
+        }
             
-        JTable weatherTable = new JTable(numQueries, columns);
         
 
+            JTable weatherTable = new JTable(numQueries, columns);
+
+        
+        
         
     }
 
