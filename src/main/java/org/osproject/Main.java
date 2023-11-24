@@ -61,7 +61,7 @@ public class Main extends Thread {
 
         // closes executor service
         executorService.shutdown();
-    }
+    }// end of main
     
     // Used for String padding format
     // Use 2 for center align, 3 for right align, anything else for left align
