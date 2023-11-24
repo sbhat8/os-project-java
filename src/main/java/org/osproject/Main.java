@@ -1,5 +1,6 @@
 package org.osproject;
 
+// Necessary imports
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,20 +16,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.swing.*;
 
 public class Main extends Thread {
     public static void main(String[] args) {
         // user input, receives string of comma separated locations, which is split into an array
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Source of information: The Weather Network, URL: www.theweathernetwork.com")
-        System.out.print("Enter query in comma separated list: ");
+        System.out.println("\n--> Source of information: The Weather Network, URL: www.theweathernetwork.com\n");
+        System.out.print("Enter cities (without state) in semicolon separated list: ");
         String queryArray = scanner.nextLine();
+        scanner.close();
         if (queryArray.isEmpty()) {
             System.out.println("Query cannot be empty.");
             return;
         }
-        String[] queries = queryArray.split(",");
+        String[] queries = queryArray.split(";");
 
         // handles thread counts and initializes executor service for thread creation
         // futures array list to store the data received from the crawler at end of thread
@@ -61,27 +62,88 @@ public class Main extends Thread {
         // closes executor service
         executorService.shutdown();
     }
+    
+    // Used for String padding format
+    // Use 2 for center align, 3 for right align, anything else for left align
+    public static String formatString(int length, int align, String source) {
+    	
+    	String leftPadding = "";
+    	String rightPadding = "";
+    	int leftPad = 0;
+    	int rightPad = 0;
+    	
+    	// return if length of the given value is bigger than the space
+    	if (source.length() > length) {
+    		return source;
+    	}
+    	// giving equal space on either side of the string for central align
+    	if (align == 2) {
+    		int padding = length - source.length();
+    		leftPad = padding / 2;
+    		rightPad = padding - leftPad;
+    	} else {
+    		if (align == 3) { // no padding on the right side for right align
+    			leftPad = length - source.length();
+    			rightPad = 0;
+    		}
+    		else { // no padding on the left side for the left align
+    			leftPad = 0;
+    			rightPad = length - source.length();
+    		}
+    	}
+    	// padding the string 
+    	for (int i = 0; i < leftPad; ++i)
+    		leftPadding += " ";
+    	for (int i = 0; i < rightPad; ++i)
+    		rightPadding += " ";
+    	return String.format("%s%s%s", leftPadding, source, rightPadding);
 
-    // function to parse and print results
+    }
+
+    // Parsing and printing the final weather results in a beautiful manner
     public static void parseResults(String query, String threadName) throws IOException {
         String resultUrl = getResultURL(query, threadName);
+                
+        // print if no results are found for a city
         if (resultUrl == null) {
-            System.out.println(threadName + ": No results found.");
+        	System.out.println("\n--+--+--+--+--+--+--\n");
+            System.out.println(threadName + ": No results found for " + query.toUpperCase() + ".");
+        	System.out.println("\n--+--+--+--+--+--+--\n");
             return;
         }
         System.out.println(threadName + ": Result url: " + resultUrl);
 
         HashMap<String, List<String>> metrics = getMetrics(resultUrl, threadName);
-        System.out.println("\n\n" + threadName + ": Weather details for " + query);
+        System.out.println("\n\n" + threadName + ": Weather details for " + query.toUpperCase() + "\n");
+        
+        // Format the output to be center aligned in each column
+        int col1 = 13;
+        int col2 = 10;
+        int col3 = 19;
+        int align = 2;
+        
+        // Header
+        System.out.println("+-------------+----------+-------------------+");
+        System.out.format("|%s|%s|%s|\n",formatString(col1,align,"Attribute"), formatString(col2,align,"Value"),formatString(col3,align,"Extra Information"));
+        // Formatting check
+        //                  12345678901234567890123456789012345678901234567890
+        //                  |  Attribute  |  Value   | Extra Information |
+        System.out.println("+-------------+----------+-------------------+");
+
+        // Iterating over all attributes
         for (Map.Entry<String, List<String>> metric : metrics.entrySet()) {
-            System.out.print(metric.getKey() + ": ");
-            List<String> details = metric.getValue();
-            System.out.print(details.get(0) + " " + details.get(1));
-            if (details.size() > 2) {
-                System.out.print(" " + details.get(2));
-            }
-            System.out.print("\n");
-        }
+        	List<String> details = metric.getValue();
+        	
+        	// printing weather details
+        	if (details.size() > 2) {
+                System.out.format("|%s|%s|%s|\n",formatString(col1,align,metric.getKey()), formatString(col2,align,details.get(0)  + " " + details.get(1)),formatString(col3,align,details.get(2)));
+        	} else {
+                System.out.format("|%s|%s|%s|\n",formatString(col1,align,metric.getKey()), formatString(col2,align,details.get(0)  + " " + details.get(1)),formatString(col3,align,""));
+        	}
+        }// end of for loop
+        
+        System.out.println("+-------------+----------+-------------------+");
+
     }
 
     // function to obtain document for a URL, uses Jsoup (which doesn't process JavaScript code)
@@ -94,6 +156,7 @@ public class Main extends Thread {
 
     // function to obtain document for a URL, uses Selenium WebDriver (which does process JavaScript code)
     // Selenium WebDriver is required for the result page due to the contents being populated with JS code.
+    @SuppressWarnings("deprecation")
     public static Document getDocumentWithJS(String url, String threadName) {
         System.out.println("\n" + threadName + ": Loading result details...");
         ChromeOptions options = new ChromeOptions();
@@ -118,12 +181,16 @@ public class Main extends Thread {
         Document doc = getDocument(queryUrl);
         Elements results = doc.select("li.result ");
 
+        // If the query contains "city, state" format, just match on the city
+        String[] queryElements = query.split(",");
+        String city = queryElements[0];
+        
         // for each result, check if the result name contains the query
         // e.g. if a result is "Atlanta, Georgia" and the query is "atlanta", it will process that result
         String resultUrl = null;
         for (Element result : results) {
             if (result == null) continue;
-            if (result.text().toLowerCase().contains(query.toLowerCase())) {
+            if (result.text().toLowerCase().contains(city.toLowerCase())) {
                 // once a result fulfills the condition, obtain the URL for the result
                 // "a" is the HTML element, "href" is an attribute on that element that contains the URL
                 Element resultElement = result.select("a[href]").first();
@@ -193,37 +260,6 @@ public class Main extends Thread {
         }
         return metricsText;
     }
-    // Making a final table to display the weather information for all threads
-    public static void FinalTable(String [] queries, HashMap<String, List<String>> metricsText){
-
-        numQueries =  queries.length();
-        frame  = new JFrame();
-        frame.setTitle("Weather Details for Queries");
-        ArrayList<String> columns = new ArrayList<String>();
-        ArrayList<String> rows = new ArrayList<String>();
-
-        for (String metric : metricsText.keySet()){    
-            columns.add(metric);
-        }
-
-        for (metrixText.values().forEach(value -> {
-            currValue = value[0] + value[1]
-            if value.length() > 1 {
-                currValue += value[2]
-                    }
-            columns.add(currValue)
-        }
-            
-        for (String city:  queries){
-            rows.add(city)
-                }
-
-        JTable weatherTable = new JTable(rows, columns);
-
-        
-        
-        
-    }
-
     
-}
+    
+}// End of class Main
