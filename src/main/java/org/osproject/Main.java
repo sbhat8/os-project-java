@@ -19,10 +19,10 @@ import java.util.concurrent.Future;
 
 public class Main extends Thread {
     public static void main(String[] args) {
-        // user input, receives string of comma separated locations, which is split into an array
+        // user input, receives string of semicolon separated locations, which is split into an array
         Scanner scanner = new Scanner(System.in);
         System.out.println("\n--> Source of information: The Weather Network, URL: www.theweathernetwork.com\n");
-        System.out.print("Enter cities (without state) in semicolon separated list: ");
+        System.out.print("Enter cities in semicolon separated list: ");
         String queryArray = scanner.nextLine();
         scanner.close();
         if (queryArray.isEmpty()) {
