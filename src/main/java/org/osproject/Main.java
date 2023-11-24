@@ -1,6 +1,6 @@
 package org.osproject;
 
-// Necessary imports
+//Necessary imports
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -98,7 +98,7 @@ public class Main extends Thread {
     		rightPadding += " ";
     	return String.format("%s%s%s", leftPadding, source, rightPadding);
 
-    }
+    }// end of formatString
 
     // Parsing and printing the final weather results in a beautiful manner
     public static void parseResults(String query, String threadName) throws IOException {
@@ -144,7 +144,7 @@ public class Main extends Thread {
         
         System.out.println("+-------------+----------+-------------------+");
 
-    }
+    }// end of parseResults
 
     // function to obtain document for a URL, uses Jsoup (which doesn't process JavaScript code)
     public static Document getDocument(String url) throws IOException {
@@ -152,7 +152,7 @@ public class Main extends Thread {
                 .header("Host", "www.theweathernetwork.com")
                 .referrer("https://www.theweathernetwork.com/us/")
                 .get();
-    }
+    }// end of getDocument
 
     // function to obtain document for a URL, uses Selenium WebDriver (which does process JavaScript code)
     // Selenium WebDriver is required for the result page due to the contents being populated with JS code.
@@ -166,7 +166,7 @@ public class Main extends Thread {
         Document doc = Jsoup.parse(driver.getPageSource());
         driver.quit();
         return doc;
-    }
+    }// end of getDocumentWithJS
 
     // function to obtain the result URL from the search page
     // e.g. query="atlanta", queryUrl="https://www.theweathernetwork.com/us/search?q=atlanta&lat=&lon="
@@ -202,7 +202,7 @@ public class Main extends Thread {
             }
         }
         return resultUrl;
-    }
+    }// end of getResultURL
 
     // function to obtain the weather details from the result page
     // e.g. resultUrl="https://www.theweathernetwork.com/us/weather/georgia/atlanta"
@@ -259,7 +259,7 @@ public class Main extends Thread {
             metricsText.put(labelText, List.of(valueText, unitText, vectorText));
         }
         return metricsText;
-    }
+    }// end of getMetrics
     
     
 }// End of class Main
