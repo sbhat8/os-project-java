@@ -4,7 +4,7 @@
 
 ## Description
 
-Currently, the crawler is able to take a query as parameter and search https://amazon.com for search results and product details. The crawler is able to extract the following information from the search results and product details pages:
+Currently, the crawler is able to take a query as parameter and search [The Weather Network](https://www.theweathernetwork.com/us) for search results and product details. The crawler is able to extract the following information from the search results and product details pages:
 
 - Product title
 
